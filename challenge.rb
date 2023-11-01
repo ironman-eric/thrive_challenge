@@ -1,4 +1,7 @@
+# frozen_string_literal: true
 require 'json'
+require 'json-schema'
+require './schema'
 
 # Sort array of users by last name
 #
@@ -93,7 +96,14 @@ def output_text_file(data)
 end
 
 companies = order_companies_by_id(JSON.parse(File.read('companies.json')))
+unless JSON::Validator.validate(Schema::SCHEMAS['company'], companies, :list => true)
+  abort('Invalid company data!')
+end
+
 users = order_users_by_last_name(JSON.parse(File.read('users.json')))
+unless JSON::Validator.validate(Schema::SCHEMAS['user'], users, :list => true)
+  abort('Invalid user data!')
+end
 
 challenge_data = generate_challenge_data(companies, users)
 reshaped_challenge_data = reshape_companies_for_file(challenge_data)
